@@ -1,0 +1,16 @@
+<% layout('layouts/boilerplate') %>
+<div class="row">
+  <% for(let snap of snaps){ %>
+      <div class="col-sm-6 mb-3 mb-sm-0">
+        <div class="card mb-3">
+          <div class="card-body">
+            <h5 class="card-title"><%= snap.title %></h5>
+            <p class="card-text"><%= snap.createdAt %></p>
+            <a href="/snaps/<%= snap.id %>" class="btn btn-dark">View details</a>
+          </div>
+        </div>
+      </div>
+  <%} %>
+</div>
+
+      

@@ -1,0 +1,19 @@
+<% layout('layouts/boilerplate') %>
+<div class="card w-100 mb-3">
+    <div class="card-body">
+      <h5 class="card-title"><%= snap.title %></h5>
+      <p class="card-text"><%= snap.content %></p>
+      <div class="d-flex justify-content-between align-items-end">
+        <span><%= snap.category %></span>
+        <span><%= String(snap.createdAt).slice(0, 25) %></span>
+      </div>
+      <div class="d-flex justify-content-between mt-3">
+        <a href="/snaps/<%= snap.id %>/edit" class="btn btn-success">Edit Snap</a>
+        <form action="/snaps/<%= snap.id %>?_method=DELETE" method="POST">
+          <button type="submit" class="btn btn-danger">Delete Snap</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  
+  
