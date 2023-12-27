@@ -5,6 +5,10 @@ const catchAsync = require("../utils/catchAsync")
 const passport = require("passport")
 const { storeReturnTo } = require('../middleware');
 
+router.get("/",(req,res)=>{
+    res.redirect("/register")
+})
+
 router.get("/register",(req,res)=>{
     res.render("users/register")
 })
