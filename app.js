@@ -76,8 +76,8 @@ app.use((err,req,res,next)=>{
     res.status(statusCode).render('error',{err})
 })
 
+const PORT = process.env.PORT
 
-
-app.listen(8000, () => {
-    console.log("Server running at port 8000")
+app.listen(PORT, () => {
+    console.log(`Server running at port ${PORT}`)
 })
