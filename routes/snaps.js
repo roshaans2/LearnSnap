@@ -2,32 +2,22 @@ const express = require("express")
 const LearnSnap = require("../models/LearnSnap")
 const catchAsync = require("../utils/catchAsync")
 const ExpressError = require("../utils/ExpressError")
-const { LearnSnapSchema } = require("../schema")
 const router = express.Router()
 
-const validateSnap = (req, res, next) => {
+const {validateSnap,isLoggedIn,isAuthor} = require("../middleware")
+const User = require("../models/user")
 
-    const { error } = LearnSnapSchema.validate(req.body)
-    if (error) {
-        const msg = error.details.map(el => el.message).join(',')
-        throw new ExpressError(msg, 400)
-    }
-    else {
-        next()
-    }
-}
-
-
-router.get("/new", (req, res) => {
+router.get("/new",isLoggedIn, (req, res) => {
     res.render("snaps/new")
 })
 
-router.get("/", catchAsync(async (req, res) => {
-    const snaps = await LearnSnap.find({})
+router.get("/",isLoggedIn,catchAsync(async (req, res) => {
+    const user = await User.findById(req.user.id).populate('snaps')
+    const snaps = user.snaps
     res.render("snaps/index", { snaps })
 }))
 
-router.get("/:id",catchAsync(async (req, res) => {
+router.get("/:id",isLoggedIn,isAuthor,catchAsync(async (req, res) => {
     const { id } = req.params
     const snap = await LearnSnap.findById(id)
     if(!snap){
@@ -37,28 +27,34 @@ router.get("/:id",catchAsync(async (req, res) => {
     res.render("snaps/show", { snap })
 }))
 
-router.get("/:id/edit",catchAsync(async (req, res) => {
+router.get("/:id/edit",isLoggedIn,isAuthor,catchAsync(async (req, res) => {
     const { id } = req.params
     const snap = await LearnSnap.findById(id)
     res.render("snaps/edit", { snap })
 }))
 
-router.post("/",  validateSnap,catchAsync(async (req, res) => {
+router.post("/",isLoggedIn,validateSnap,catchAsync(async (req, res) => {
+    const id = req.user.id
+    const user = await User.findById(id)
     const snap = LearnSnap(req.body)
+    snap.author = id
+    user.snaps.push(snap)
     await snap.save()
+    await user.save()
     req.flash("success","Successfully added new snap")
     res.redirect("/snaps")
 }))
 
-router.put("/:id", validateSnap, catchAsync(async (req, res) => {
+router.put("/:id", isLoggedIn,isAuthor,validateSnap, catchAsync(async (req, res) => {
     const { id } = req.params
     const snap = await LearnSnap.findByIdAndUpdate(id, req.body, { new: true, runValidators: true })
     req.flash("success","Successfully edited snap")
     res.redirect(`/snaps/${snap.id}`)
 }))
 
-router.delete("/:id", catchAsync(async (req, res) => {
+router.delete("/:id",isLoggedIn,isAuthor,catchAsync(async (req, res) => {
     const { id } = req.params
+    const user = await User.findByIdAndUpdate(req.user.id,{$pull:{snaps:id}})
     await LearnSnap.findByIdAndDelete(id)
     req.flash("success","Successfully deleted snap")
     res.redirect("/snaps")
